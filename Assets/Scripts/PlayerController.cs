@@ -187,7 +187,8 @@ public class PlayerController : MonoBehaviour
             Rect derp = Rect.zero;
             derp.width = 100;
             derp.height = 100;
-            GUI.TextArea(derp, rigidbody.velocity.ToString());
+
+            GUI.TextArea(derp, "Velocity \n" + rigidbody.velocity.ToString());
         }
     }
 }
