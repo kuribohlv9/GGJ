@@ -9,7 +9,6 @@ public class PlayerController : MonoBehaviour
     private Collider2D collider;
     private Vector2 direction = Vector2.zero;
     private Vector2 WavedashDirection = Vector2.zero;
-    public PhysicsMaterial2D physmat;
     public Transform GroundCheck;
     private bool grounded = false;
     private float WavedashTimer = 0;
@@ -23,7 +22,8 @@ public class PlayerController : MonoBehaviour
     public float jumpheight = 1;
     public float wavedashspeed = 1;
     public float wavedashlenght = 1;
-    
+    public bool EnableDebug = false;
+
     // Use this for initialization
     void Start()
     {
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
             rigidbody.AddForce(new Vector2(0, jumpheight));
             transform.localScale = new Vector3(0.5f, 1, 1);
         }
-        else if(canWallJump)
+        else if (canWallJump)
         {
 
         }
@@ -88,7 +88,6 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        //transform.position = Vector3.MoveTowards(transform.position, transform.position + direction, Time.deltaTime * speed);
         if (direction != Vector2.zero)
         {
             rigidbody.AddForce(direction.normalized * Time.deltaTime * speed);
@@ -99,7 +98,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleWavedash()
     {
-        if (CanWavedash && Input.GetKeyDown(KeyCode.X))
+        if (CanWavedash && Input.GetButtonDown("Fire1"))
         {
             WavedashDirection.x = Input.GetAxis("Horizontal");
             WavedashDirection.y = Input.GetAxis("Vertical");
@@ -122,11 +121,11 @@ public class PlayerController : MonoBehaviour
     {
         if (EnableWavedash && col.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
-                foreach(ContactPoint2D contact in col.contacts)
-                {
-                    Vector2 angledirection = WavedashDirection.normalized - contact.normal * Vector2.Dot(WavedashDirection.normalized, contact.normal);
-                    rigidbody.velocity = angledirection.normalized * Time.deltaTime * wavedashspeed;
-                }
+            foreach (ContactPoint2D contact in col.contacts)
+            {
+                Vector2 angledirection = WavedashDirection.normalized - contact.normal * Vector2.Dot(WavedashDirection.normalized, contact.normal);
+                rigidbody.velocity = angledirection.normalized * Time.deltaTime * wavedashspeed;
+            }
 
             EnableWavedash = false;
             rigidbody.gravityScale = gravity;
@@ -135,10 +134,10 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D col)
     {
-        if(canWallJump && !grounded && Input.GetButtonDown("Jump"))
+        if (canWallJump && !grounded && Input.GetButtonDown("Jump"))
         {
             Vector2 normal = Vector2.zero;
-            foreach(ContactPoint2D contact in col.contacts)
+            foreach (ContactPoint2D contact in col.contacts)
             {
                 normal = contact.normal;
             }
@@ -149,8 +148,18 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D col)
     {
-        if (col.gameObject.layer == LayerMask.NameToLayer("Ground")) ;
+        if (col.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
+        }
+    }
+    void OnGUI()
+    {
+        if (EnableDebug)
+        {
+            Rect derp = Rect.zero;
+            derp.width = 100;
+            derp.height = 100;
+            GUI.TextArea(derp, rigidbody.velocity.ToString());
         }
     }
 }
