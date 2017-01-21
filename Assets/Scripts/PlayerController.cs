@@ -14,16 +14,23 @@ public class PlayerController : MonoBehaviour
     private float WavedashTimer = 0;
     private bool EnableWavedash = false;
     private bool CanWavedash = false;
+    private bool EnableShortHopCheck = false;
     private float gravity;
     private bool canWallJump = true;
     private Collider2D walljumpcollider;
+    private float shorthopcheck = 0;
 
     public float speed = 1;
     public float jumpheight = 1;
     public float wavedashspeed = 1;
     public float wavedashlenght = 1;
-    public bool EnableDebug = false;
+    public float shorthopcheckvalue = 0.1f;
+    public float shorthopcut = 0.5f;
 
+    public float extraspeedfrominitialgap = 1;
+    public float extraspeedfrominitial = 1;
+
+    public bool EnableDebug = false;
     // Use this for initialization
     void Start()
     {
@@ -41,6 +48,7 @@ public class PlayerController : MonoBehaviour
 
             CheckGrounded();
             HandleJumping();
+            HandleShortHop();
 
             HandleMovement();
 
@@ -79,10 +87,30 @@ public class PlayerController : MonoBehaviour
         {
             rigidbody.AddForce(new Vector2(0, jumpheight));
             transform.localScale = new Vector3(0.5f, 1, 1);
+            EnableShortHopCheck = true;
         }
         else if (canWallJump)
         {
 
+        }
+    }
+
+    private void HandleShortHop()
+    {
+        if(EnableShortHopCheck)
+        {
+            shorthopcheck -= Time.deltaTime;
+            if(shorthopcheck < 0)
+            {
+                if(!Input.GetButton("Jump"))
+                {
+                    Vector2 tempvel = rigidbody.velocity;
+                    tempvel.y *= shorthopcut;
+                    rigidbody.velocity = tempvel;
+                }
+                shorthopcheck = shorthopcheckvalue;
+                EnableShortHopCheck = false;
+            }
         }
     }
 
@@ -91,8 +119,8 @@ public class PlayerController : MonoBehaviour
         if (direction != Vector2.zero)
         {
             rigidbody.AddForce(direction.normalized * Time.deltaTime * speed);
-            if (rigidbody.velocity.x < 1 && direction.x > 0 || rigidbody.velocity.x > -1 && direction.x < 0)
-                rigidbody.AddForce(direction.normalized * Time.deltaTime * speed);
+            if (rigidbody.velocity.x < extraspeedfrominitialgap && direction.x > 0 || rigidbody.velocity.x > -extraspeedfrominitialgap && direction.x < 0)
+                rigidbody.AddForce(direction.normalized * Time.deltaTime * extraspeedfrominitial);
         }
     }
 
